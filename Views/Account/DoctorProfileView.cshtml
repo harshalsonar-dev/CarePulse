@@ -47,7 +47,15 @@
                     <div class="col-12">
                         <label class="text-muted small fw-semibold">Weekly Consultation Schedule</label>
                         <div class="p-3 bg-light rounded-3 border">
-                            <div><strong>Active Working Days:</strong> @Model.WorkingDays</div>
+                            <div class="mb-2">
+                                <strong class="d-block mb-1">Active Working Days:</strong>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (var day in (Model.WorkingDays ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                                    {
+                                        <span class="badge bg-white text-primary border shadow-sm">@day</span>
+                                    }
+                                </div>
+                            </div>
                             <div><strong>Daily Hours:</strong> @DateTime.Today.Add(Model.DailyStartTime).ToString("hh:mm tt") &ndash; @DateTime.Today.Add(Model.DailyEndTime).ToString("hh:mm tt")</div>
                             <div><strong>Slot Duration:</strong> @Model.SlotDurationMinutes Minutes per Patient</div>
                         </div>

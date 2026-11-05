@@ -102,7 +102,14 @@
                                 <small class="text-muted d-block">Lic: @doc.LicenseNumber</small>
                             </td>
                             <td>@doc.Department?.Name</td>
-                            <td><span class="badge bg-light text-dark border">@doc.WorkingDays</span></td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1" style="max-width: 220px;">
+                                    @foreach (var day in (doc.WorkingDays ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                                    {
+                                        <span class="badge bg-light text-secondary border">@day.Substring(0, Math.Min(3, day.Length))</span>
+                                    }
+                                </div>
+                            </td>
                             <td>@DateTime.Today.Add(doc.DailyStartTime).ToString("hh:mm tt") &ndash; @DateTime.Today.Add(doc.DailyEndTime).ToString("hh:mm tt")</td>
                             <td>$@doc.ConsultationFee</td>
                             <td>

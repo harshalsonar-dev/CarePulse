@@ -83,14 +83,19 @@
                                 @doc.Bio
                             </p>
 
-                            <div class="p-2 bg-light rounded-3 small mb-3 border">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span class="text-muted">Working Days:</span>
-                                    <span class="fw-bold">@doc.WorkingDays</span>
+                            <div class="p-3 bg-light rounded-3 small mb-3 border">
+                                <div class="mb-2">
+                                    <span class="text-muted d-block small mb-1 fw-semibold">Consultation Days:</span>
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var day in (doc.WorkingDays ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                                        {
+                                            <span class="badge bg-white text-primary border shadow-sm">@day.Substring(0, Math.Min(3, day.Length))</span>
+                                        }
+                                    </div>
                                 </div>
                                 <div class="d-flex justify-content-between mb-1">
                                     <span class="text-muted">Hours:</span>
-                                    <span>@DateTime.Today.Add(doc.DailyStartTime).ToString("hh:mm tt") &ndash; @DateTime.Today.Add(doc.DailyEndTime).ToString("hh:mm tt")</span>
+                                    <span class="fw-semibold">@DateTime.Today.Add(doc.DailyStartTime).ToString("hh:mm tt") &ndash; @DateTime.Today.Add(doc.DailyEndTime).ToString("hh:mm tt")</span>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">Consultation Fee:</span>

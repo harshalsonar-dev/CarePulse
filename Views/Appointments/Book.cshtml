@@ -141,7 +141,7 @@
         function updateDoctorInfo() {
             const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
             if (selectedOption && selectedOption.value) {
-                docWorkingDays.textContent = selectedOption.dataset.workingdays || 'Monday-Friday';
+                docWorkingDays.textContent = (selectedOption.dataset.workingdays || 'Monday - Friday').replace(/,/g, ', ');
                 docRoom.textContent = selectedOption.dataset.room || 'General';
                 docFee.textContent = '$' + (selectedOption.dataset.fee || '0');
                 doctorInfoCard.classList.remove('d-none');
