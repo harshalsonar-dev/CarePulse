@@ -1,0 +1,59 @@
+@{
+    ViewData["Title"] = "EHR Privacy & Clinical Access Control";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card cp-card border-0 p-4">
+                <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                    <div class="bg-primary text-white rounded-circle p-3 fs-2">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">EHR Privacy & Role-Based Access Control (RBAC)</h3>
+                        <p class="text-muted small mb-0">Security architecture protecting sensitive medical records & patient health data</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold text-primary">1. Role-Based Access Control Architecture</h5>
+                    <p class="text-secondary small">
+                        CarePulse strictly enforces authorization barriers across three distinct clinical personas:
+                    </p>
+                    <ul class="small text-secondary">
+                        <li><strong>Patient:</strong> Restricted strictly to their own personal EHR, past appointments, active prescriptions, and uploaded test documents. Cross-patient data access is blocked at the database level.</li>
+                        <li><strong>Attending Physician (Doctor):</strong> Authorized to access medical histories and write clinical notes only for patients under their active or scheduled consultation care.</li>
+                        <li><strong>Clinical Administrator (Admin):</strong> Authorized to manage practitioner rosters, clinic departments, appointment throughput, and system audit logs.</li>
+                    </ul>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold text-primary">2. Real-Time Scheduling Conflict Prevention</h5>
+                    <p class="text-secondary small">
+                        To resolve reception congestion, the scheduling engine verifies availability before slot commitment:
+                    </p>
+                    <ul class="small text-secondary">
+                        <li>Validates practitioner active working days and daily operational hours.</li>
+                        <li>Detects overlapping time slots on non-cancelled visits for both practitioner and patient.</li>
+                        <li>Ensures zero simultaneous double-bookings across all specialty clinics.</li>
+                    </ul>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold text-primary">3. Digital Prescriptions & Electronic Signatures</h5>
+                    <p class="text-secondary small">
+                        All prescriptions are rendered through high-fidelity QuestPDF documents embedded with attending practitioner registration metadata, dispensing instructions, and clinical verification timestamps.
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold text-primary">4. Cloud Document Vault (Azure Services)</h5>
+                    <p class="text-secondary small">
+                        Medical attachments, radiology scans, and laboratory reports are encrypted and stored in Azure Blob Storage with fallback to hardened local storage when cloud connectivity is disabled.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

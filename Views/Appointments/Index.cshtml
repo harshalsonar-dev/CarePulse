@@ -1,0 +1,154 @@
+@model List<CarePulse.Models.Entities.Appointment>
+@{
+    ViewData["Title"] = "Clinical Appointments";
+    var statusFilter = ViewBag.StatusFilter as string ?? "";
+    var dateFilter = ViewBag.DateFilter as string ?? "";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-calendar2-check text-primary me-2"></i> Clinical Appointments
+            </h2>
+            <p class="text-muted small mb-0">Real-time scheduling overview, status tracking & electronic consultations</p>
+        </div>
+        <div>
+            @if (User.IsInRole("Patient") || User.IsInRole("Admin"))
+            {
+                <a asp-action="Book" class="btn btn-cp-primary">
+                    <i class="bi bi-calendar-plus me-1"></i> Book New Appointment
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Filter Pills -->
+    <div class="card cp-card border-0 mb-4 p-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div class="btn-group btn-group-sm" role="group">
+                <a asp-action="Index" class="btn @(string.IsNullOrEmpty(statusFilter) ? "btn-primary" : "btn-outline-secondary")">
+                    All (@Model.Count)
+                </a>
+                <a asp-action="Index" asp-route-statusFilter="Confirmed" class="btn @(statusFilter == "Confirmed" ? "btn-primary" : "btn-outline-secondary")">
+                    Confirmed
+                </a>
+                <a asp-action="Index" asp-route-statusFilter="Completed" class="btn @(statusFilter == "Completed" ? "btn-primary" : "btn-outline-secondary")">
+                    Completed
+                </a>
+                <a asp-action="Index" asp-route-statusFilter="Cancelled" class="btn @(statusFilter == "Cancelled" ? "btn-primary" : "btn-outline-secondary")">
+                    Cancelled
+                </a>
+            </div>
+
+            <div class="btn-group btn-group-sm" role="group">
+                <a asp-action="Index" asp-route-dateFilter="today" class="btn @(dateFilter == "today" ? "btn-dark" : "btn-outline-dark")">
+                    <i class="bi bi-clock me-1"></i> Today's Schedule
+                </a>
+                <a asp-action="Index" asp-route-dateFilter="upcoming" class="btn @(dateFilter == "upcoming" ? "btn-dark" : "btn-outline-dark")">
+                    <i class="bi bi-calendar3 me-1"></i> Upcoming Only
+                </a>
+            </div>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card cp-card border-0 p-5 text-center">
+            <div class="text-muted mb-3 fs-1"><i class="bi bi-calendar-x"></i></div>
+            <h5 class="fw-bold">No appointments found matching this filter</h5>
+            <p class="text-muted small">Schedule an appointment or adjust your active search criteria.</p>
+            @if (User.IsInRole("Patient") || User.IsInRole("Admin"))
+            {
+                <div class="mt-2">
+                    <a asp-action="Book" class="btn btn-cp-primary btn-sm">Schedule Appointment</a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card cp-card border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light text-secondary small text-uppercase">
+                        <tr>
+                            <th class="ps-4">Appointment #</th>
+                            <th>Date & Time</th>
+                            <th>Doctor & Specialty</th>
+                            <th>Patient</th>
+                            <th>Chief Complaint</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var appt in Model)
+                        {
+                            var statusClass = appt.Status switch
+                            {
+                                AppointmentStatus.Confirmed => "badge-status-confirmed",
+                                AppointmentStatus.Completed => "badge-status-completed",
+                                AppointmentStatus.Cancelled => "badge-status-cancelled",
+                                _ => "badge-status-pending"
+                            };
+
+                            var formattedTime = $"{DateTime.Today.Add(appt.StartTime):hh:mm tt} - {DateTime.Today.Add(appt.EndTime):hh:mm tt}";
+
+                            <tr>
+                                <td class="ps-4 fw-bold">
+                                    <a asp-action="Details" asp-route-id="@appt.Id" class="text-decoration-none text-primary">
+                                        @appt.AppointmentNumber
+                                    </a>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">@appt.AppointmentDate.ToString("dd MMM yyyy")</div>
+                                    <small class="text-muted"><i class="bi bi-clock me-1"></i> @formattedTime</small>
+                                </td>
+                                <td>
+                                    <div class="fw-bold">Dr. @(appt.Doctor?.User?.FullName ?? "Physician")</div>
+                                    <small class="badge bg-light text-secondary border">@appt.Doctor?.Specialization</small>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@(appt.Patient?.User?.FullName ?? "Patient")</div>
+                                    <small class="text-muted">Blood: @appt.Patient?.BloodGroup</small>
+                                </td>
+                                <td>
+                                    <span class="d-inline-block text-truncate" style="max-width: 200px;" title="@appt.ChiefComplaint">
+                                        @appt.ChiefComplaint
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge @statusClass px-2 py-1 rounded-pill">
+                                        @appt.Status
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@appt.Id" class="btn btn-outline-secondary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        @if ((User.IsInRole("Doctor") || User.IsInRole("Admin")) && appt.Status == AppointmentStatus.Confirmed)
+                                        {
+                                            <a asp-controller="Consultation" asp-action="Create" asp-route-appointmentId="@appt.Id" class="btn btn-success" title="Conduct Consultation & Write Rx">
+                                                <i class="bi bi-pencil-square me-1"></i> Consult
+                                            </a>
+                                        }
+
+                                        @if (appt.Status == AppointmentStatus.Completed && appt.Consultation != null)
+                                        {
+                                            <a asp-controller="Consultation" asp-action="DownloadPrescriptionPdf" asp-route-id="@appt.Consultation.Id" target="_blank" class="btn btn-primary" title="Download Digital Rx PDF">
+                                                <i class="bi bi-file-earmark-pdf"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

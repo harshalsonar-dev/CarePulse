@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="container py-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card cp-card border-0 p-5">
+                <div class="text-danger mb-3">
+                    <i class="bi bi-shield-x display-1"></i>
+                </div>
+                <h2 class="fw-bold text-dark">403 - Restricted Clinical Area</h2>
+                <p class="text-muted mb-4">
+                    Strict Role-Based Access Control (RBAC) is enforced. You do not have the required administrative or medical clearance to access this patient or clinical resource.
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">Return to Homepage</a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Sign in with Authorized Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

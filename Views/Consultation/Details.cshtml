@@ -1,0 +1,219 @@
+@model CarePulse.Models.Entities.Consultation
+@{
+    ViewData["Title"] = $"Prescription - {Model.Prescription?.PrescriptionNumber ?? $"RX-{Model.Id}"}";
+    var doc = Model.Doctor;
+    var patient = Model.Patient;
+    var rx = Model.Prescription;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Action Bar -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                <a asp-controller="Appointments" asp-action="Details" asp-route-id="@Model.AppointmentId" class="btn btn-outline-secondary btn-sm">
+                    &larr; Back to Appointment
+                </a>
+
+                <div class="d-flex gap-2">
+                    <a asp-action="DownloadPrescriptionPdf" asp-route-id="@Model.Id" target="_blank" class="btn btn-cp-primary btn-sm fw-bold">
+                        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Download PDF Summary
+                    </a>
+                    <button type="button" onclick="window.print()" class="btn btn-outline-dark btn-sm">
+                        <i class="bi bi-printer me-1"></i> Print
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rx Sheet Card -->
+            <div class="rx-sheet mb-4">
+                <!-- Clinic Header -->
+                <div class="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="bi bi-heart-pulse-fill text-danger fs-2"></i>
+                            <h3 class="fw-bold text-primary mb-0">CAREPULSE CLINICAL MEDICAL CENTER</h3>
+                        </div>
+                        <div class="text-muted small">Specialized Clinical Care & Electronic Health Records (EHR)</div>
+                        <div class="text-secondary small">450 Health Avenue, Medical City | Helpline: +1 (800) 555-PULSE</div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-primary fs-6 px-3 py-2 mb-1">
+                            @(rx?.PrescriptionNumber ?? $"RX-{Model.Id:D5}")
+                        </span>
+                        <div class="small text-muted">Date: @Model.ConsultationDate.ToString("dd MMM yyyy, hh:mm tt")</div>
+                        <div class="small text-muted">Appt Ref: @Model.Appointment?.AppointmentNumber</div>
+                    </div>
+                </div>
+
+                <!-- Attending Physician & Patient Banner -->
+                <div class="row g-3 p-3 bg-light rounded-3 border mb-4">
+                    <div class="col-md-6 border-end">
+                        <small class="text-uppercase text-muted fw-bold d-block mb-1">Attending Physician</small>
+                        <h5 class="fw-bold text-dark mb-0">Dr. @(doc?.User?.FullName ?? "Physician")</h5>
+                        <div class="text-primary small fw-semibold">@doc?.Qualification &bull; @doc?.Specialization</div>
+                        <div class="text-muted small">Dept: @doc?.Department?.Name | Lic #: @doc?.LicenseNumber</div>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-uppercase text-muted fw-bold d-block mb-1">Patient Details</small>
+                        <h5 class="fw-bold text-dark mb-0">@(patient?.User?.FullName ?? "Patient Name")</h5>
+                        <div class="small text-secondary">
+                            Gender: @(patient?.User?.Gender?.ToString() ?? "N/A") | 
+                            Blood: <strong class="text-danger">@patient?.BloodGroup</strong>
+                        </div>
+                        @if (!string.IsNullOrEmpty(patient?.Allergies))
+                        {
+                            <div class="small text-danger fw-bold mt-1">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Allergies: @patient.Allergies
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Clinical Vitals -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-secondary text-uppercase small mb-2">Recorded Vitals:</h6>
+                    <div class="row g-2">
+                        <div class="col">
+                            <div class="vital-item">
+                                <div class="vital-value">@(Model.BloodPressure ?? "--")</div>
+                                <div class="vital-label">BP (mmHg)</div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="vital-item">
+                                <div class="vital-value">@(Model.HeartRateBpm?.ToString() ?? "--")</div>
+                                <div class="vital-label">Pulse (bpm)</div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="vital-item">
+                                <div class="vital-value">@(Model.TemperatureF?.ToString() ?? "--")</div>
+                                <div class="vital-label">Temp (°F)</div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="vital-item">
+                                <div class="vital-value">@(Model.SpO2Percentage?.ToString() ?? "--")%</div>
+                                <div class="vital-label">SpO2</div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="vital-item">
+                                <div class="vital-value">@(Model.WeightKg?.ToString() ?? "--")</div>
+                                <div class="vital-label">Weight (kg)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Diagnosis & Complaint -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100">
+                            <small class="text-muted fw-bold d-block">Chief Complaint:</small>
+                            <div class="text-dark">@Model.ChiefComplaint</div>
+                            @if (!string.IsNullOrEmpty(Model.HistoryOfPresentIllness))
+                            {
+                                <small class="text-muted fw-bold d-block mt-2">Clinical Notes:</small>
+                                <div class="text-secondary small">@Model.HistoryOfPresentIllness</div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 h-100 border-start border-4 border-danger">
+                            <small class="text-muted fw-bold d-block">Diagnosis:</small>
+                            <h5 class="fw-bold text-danger mb-0">@Model.Diagnosis</h5>
+                            @if (!string.IsNullOrEmpty(Model.PhysicalExamination))
+                            {
+                                <small class="text-muted fw-bold d-block mt-2">Physical Examination:</small>
+                                <div class="text-secondary small">@Model.PhysicalExamination</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prescription Items -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <span class="rx-logo">℞</span>
+                        <h5 class="fw-bold text-primary mb-0">Medication Regimen</h5>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-primary small">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Medicine / Formulation</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Duration</th>
+                                    <th>Route / Instructions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ int itemIdx = 1; }
+                                @if (rx?.Items != null && rx.Items.Any())
+                                {
+                                    @foreach (var item in rx.Items)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold">@itemIdx</td>
+                                            <td class="fw-bold text-primary">@item.MedicineName</td>
+                                            <td>@item.Dosage</td>
+                                            <td><span class="badge bg-light text-dark border">@item.Frequency</span></td>
+                                            <td>@item.Duration</td>
+                                            <td>@item.Route - @item.SpecialInstructions</td>
+                                        </tr>
+                                        itemIdx++;
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">No medicinal prescriptions recorded.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Doctor Advice & Follow-Up -->
+                @if (!string.IsNullOrEmpty(Model.DoctorAdvice) || Model.FollowUpDate.HasValue)
+                {
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        @if (!string.IsNullOrEmpty(Model.DoctorAdvice))
+                        {
+                            <h6 class="fw-bold text-secondary mb-1">Doctor Advice & Lifestyle Recommendations:</h6>
+                            <p class="text-dark mb-2">@Model.DoctorAdvice</p>
+                        }
+
+                        @if (Model.FollowUpDate.HasValue)
+                        {
+                            <div class="text-primary fw-bold small">
+                                <i class="bi bi-calendar-event me-1"></i> Recommended Clinical Follow-up: @Model.FollowUpDate.Value.ToString("dddd, dd MMMM yyyy")
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Digital Verification Footer -->
+                <div class="d-flex justify-content-between align-items-end pt-4 border-top mt-4">
+                    <div>
+                        <div class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 mb-1">
+                            <i class="bi bi-patch-check-fill me-1"></i> Digitally Verified Clinical Record
+                        </div>
+                        <div class="small text-muted">Generated via CarePulse Healthcare Electronic System</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold text-primary">Dr. @(doc?.User?.FullName ?? "Physician")</div>
+                        <div class="small text-muted">License: @doc?.LicenseNumber</div>
+                        <small class="text-success fw-semibold">[ Digitally Signed ]</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

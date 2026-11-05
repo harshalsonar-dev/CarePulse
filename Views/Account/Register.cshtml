@@ -1,0 +1,113 @@
+@model CarePulse.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Patient EHR Registration";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card cp-card border-0 p-4">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-2">
+                        <i class="bi bi-person-heart fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">Create Patient Electronic Health Record (EHR)</h3>
+                    <p class="text-muted small">Register to book certified doctor consultations and receive digital prescriptions</p>
+                </div>
+
+                <form asp-action="Register" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">1. Personal & Contact Details</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label fw-semibold small">Full Name</label>
+                            <input asp-for="FullName" class="form-control" placeholder="e.g. John Doe" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label fw-semibold small">Email Address</label>
+                            <input asp-for="Email" class="form-control" placeholder="john.doe@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold small">Contact Number</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="+1 (555) 012-3456" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="DateOfBirth" class="form-label fw-semibold small">Date of Birth</label>
+                            <input asp-for="DateOfBirth" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-3">
+                            <label asp-for="Gender" class="form-label fw-semibold small">Gender</label>
+                            <select asp-for="Gender" class="form-select">
+                                <option value="1">Male</option>
+                                <option value="2">Female</option>
+                                <option value="3">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">2. Clinical & Emergency Baseline</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label asp-for="BloodGroup" class="form-label fw-semibold small">Blood Group</label>
+                            <select asp-for="BloodGroup" class="form-select">
+                                <option value="O+">O Positive (O+)</option>
+                                <option value="O-">O Negative (O-)</option>
+                                <option value="A+">A Positive (A+)</option>
+                                <option value="A-">A Negative (A-)</option>
+                                <option value="B+">B Positive (B+)</option>
+                                <option value="B-">B Negative (B-)</option>
+                                <option value="AB+">AB Positive (AB+)</option>
+                                <option value="AB-">AB Negative (AB-)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="EmergencyContactName" class="form-label fw-semibold small">Emergency Contact Person</label>
+                            <input asp-for="EmergencyContactName" class="form-control" placeholder="Spouse, Parent, Guardian" />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="EmergencyContactPhone" class="form-label fw-semibold small">Emergency Phone</label>
+                            <input asp-for="EmergencyContactPhone" class="form-control" placeholder="+1 555-0199" />
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Allergies" class="form-label fw-semibold small">Known Drug / Environmental Allergies</label>
+                            <input asp-for="Allergies" class="form-control" placeholder="e.g. Penicillin, Sulfa drugs, Latex (or None)" />
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label fw-semibold small">Residential Address</label>
+                            <input asp-for="Address" class="form-control" placeholder="Street, City, State, Zip" />
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">3. Security Credentials</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label fw-semibold small">Password (Min 6 chars)</label>
+                            <input asp-for="Password" class="form-control" placeholder="••••••••" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmPassword" class="form-label fw-semibold small">Confirm Password</label>
+                            <input asp-for="ConfirmPassword" class="form-control" placeholder="••••••••" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-cp-primary py-2 fw-semibold">
+                            <i class="bi bi-file-earmark-check me-1"></i> Register Clinical Account & EHR
+                        </button>
+                    </div>
+
+                    <div class="text-center small text-muted">
+                        Already have an account? <a asp-action="Login" class="text-primary fw-semibold text-decoration-none">Sign In Here</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

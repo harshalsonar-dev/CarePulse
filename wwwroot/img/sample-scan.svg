@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="100%" height="100%">
+  <rect width="800" height="600" fill="#0f172a"/>
+  <!-- Grid Lines -->
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="800" height="600" fill="url(#grid)" />
+  
+  <!-- Header Text -->
+  <text x="40" y="50" fill="#38bdf8" font-family="Arial, sans-serif" font-size="20" font-weight="bold">CAREPULSE RADIOLOGY &amp; DIAGNOSTIC IMAGING</text>
+  <text x="40" y="75" fill="#94a3b8" font-family="Arial, sans-serif" font-size="12">PATIENT REF: BRUCE WAYNE | SCAN: PARANASAL SINUS AXIAL CT</text>
+  
+  <!-- Simulated CT / Radiology Scan Shapes -->
+  <ellipse cx="400" cy="320" rx="220" ry="180" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="8 4"/>
+  <ellipse cx="400" cy="320" rx="190" ry="150" fill="#1e293b" stroke="#0ea5e9" stroke-width="2"/>
+  
+  <!-- Sinus cavities -->
+  <path d="M 340 280 Q 320 330 360 360 Q 380 340 370 290 Z" fill="#0284c7" opacity="0.6"/>
+  <path d="M 460 280 Q 480 330 440 360 Q 420 340 430 290 Z" fill="#0284c7" opacity="0.6"/>
+  
+  <!-- Clinical Findings callout -->
+  <circle cx="340" cy="330" r="16" fill="none" stroke="#ef4444" stroke-width="3"/>
+  <line x1="324" y1="330" x2="220" y2="400" stroke="#ef4444" stroke-width="2"/>
+  <rect x="120" y="400" width="200" height="40" rx="4" fill="#ef4444" opacity="0.2"/>
+  <text x="130" y="425" fill="#fca5a5" font-family="Arial, sans-serif" font-size="12" font-weight="bold">Mucosal thickening (Sinusitis)</text>
+  
+  <!-- Timestamp / Watermark -->
+  <text x="40" y="560" fill="#64748b" font-family="Arial, sans-serif" font-size="11">DICOM VERIFIED | CAREPULSE EHR CLOUD VAULT</text>
+  <text x="620" y="560" fill="#38bdf8" font-family="Arial, sans-serif" font-size="11">WINDOW: L:40 W:400</text>
+</svg>

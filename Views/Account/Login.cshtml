@@ -1,0 +1,86 @@
+@model CarePulse.Models.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Clinical Sign In";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card cp-card border-0 p-4">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex p-3 rounded-circle bg-primary-subtle text-primary mb-2">
+                        <i class="bi bi-shield-lock-fill fs-2"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">CarePulse Portal Sign In</h3>
+                    <p class="text-muted small">Access clinical schedules, electronic records & prescriptions</p>
+                </div>
+
+                <!-- One-click Demo Credentials Auto-Fill -->
+                <div class="mb-4 p-3 bg-light rounded-3 border">
+                    <small class="fw-bold text-secondary d-block mb-2">⚡ Quick 1-Click Demo Login:</small>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="fillCreds('doctor.meredith@carepulse.com', 'Doctor@123')">
+                            <i class="bi bi-heart-pulse me-1"></i> Doctor
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="fillCreds('patient.bruce@carepulse.com', 'Patient@123')">
+                            <i class="bi bi-person me-1"></i> Patient
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillCreds('admin@carepulse.com', 'Admin@123')">
+                            <i class="bi bi-shield-check me-1"></i> Admin
+                        </button>
+                    </div>
+                </div>
+
+                <form asp-action="Login" method="post" id="loginForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3 small"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold small">Clinical / Patient Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
+                            <input asp-for="Email" id="emailInput" class="form-form form-control" placeholder="name@carepulse.com" />
+                        </div>
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold small">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-key text-muted"></i></span>
+                            <input asp-for="Password" id="passwordInput" type="password" class="form-control" placeholder="••••••••" />
+                        </div>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="form-check">
+                            <input asp-for="RememberMe" class="form-check-input" />
+                            <label asp-for="RememberMe" class="form-check-label small text-muted">Remember this terminal</label>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-cp-primary py-2 fw-semibold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Authenticate & Enter
+                        </button>
+                    </div>
+
+                    <div class="text-center small text-muted">
+                        New patient? <a asp-action="Register" class="text-primary fw-semibold text-decoration-none">Create Health Record Profile</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function fillCreds(email, password) {
+            document.getElementById('emailInput').value = email;
+            document.getElementById('passwordInput').value = password;
+        }
+    </script>
+}

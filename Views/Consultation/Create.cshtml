@@ -1,0 +1,249 @@
+@model CarePulse.Models.ViewModels.CreateConsultationViewModel
+@{
+    var appt = Model.Appointment;
+    ViewData["Title"] = $"Consultation - {appt?.AppointmentNumber}";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card cp-card border-0 p-4">
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4">
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary mb-1">Clinical Consultation Workspace</span>
+                        <h3 class="fw-bold mb-0">Record Consultation & Issue Digital Rx</h3>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold">Appt: @appt?.AppointmentNumber</div>
+                        <small class="text-muted">Patient: @appt?.Patient?.User?.FullName</small>
+                    </div>
+                </div>
+
+                <!-- Patient Snapshot Banner -->
+                <div class="alert alert-light border p-3 rounded-3 mb-4">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Patient Name</small>
+                            <strong>@appt?.Patient?.User?.FullName</strong>
+                        </div>
+                        <div class="col-md-2">
+                            <small class="text-muted d-block">Blood Group</small>
+                            <strong class="text-danger">@appt?.Patient?.BloodGroup</strong>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Known Allergies</small>
+                            <span class="text-danger fw-bold">@(appt?.Patient?.Allergies ?? "None Reported")</span>
+                        </div>
+                        <div class="col-md-3 text-md-end">
+                            <a asp-controller="Ehr" asp-action="Patient" asp-route-id="@appt?.PatientId" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-file-earmark-medical me-1"></i> Open EHR History
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <form asp-action="Create" method="post" id="consultationForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="AppointmentId" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small mb-3"></div>
+
+                    <!-- 1. Clinical Examination & Vitals -->
+                    <h5 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-activity me-1"></i> 1. Clinical Vitals & Physical Baseline
+                    </h5>
+                    <div class="row g-3 mb-4 p-3 bg-light rounded-3 border">
+                        <div class="col-md-3 col-6">
+                            <label asp-for="BloodPressure" class="form-label small fw-semibold">Blood Pressure</label>
+                            <input asp-for="BloodPressure" class="form-control form-control-sm" placeholder="120/80 mmHg" />
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label asp-for="HeartRateBpm" class="form-label small fw-semibold">Heart Rate (bpm)</label>
+                            <input asp-for="HeartRateBpm" class="form-control form-control-sm" type="number" placeholder="72" />
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label asp-for="TemperatureF" class="form-label small fw-semibold">Temperature (°F)</label>
+                            <input asp-for="TemperatureF" class="form-control form-control-sm" step="0.1" placeholder="98.6" />
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label asp-for="SpO2Percentage" class="form-label small fw-semibold">SpO2 (%)</label>
+                            <input asp-for="SpO2Percentage" class="form-control form-control-sm" type="number" placeholder="99" />
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label asp-for="WeightKg" class="form-label small fw-semibold">Weight (kg)</label>
+                            <input asp-for="WeightKg" class="form-control form-control-sm" step="0.1" placeholder="70.5" />
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <label asp-for="HeightCm" class="form-label small fw-semibold">Height (cm)</label>
+                            <input asp-for="HeightCm" class="form-control form-control-sm" step="0.5" placeholder="175" />
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <label asp-for="PhysicalExamination" class="form-label small fw-semibold">Physical Examination Findings</label>
+                            <input asp-for="PhysicalExamination" class="form-control form-control-sm" placeholder="e.g. Chest clear, abdomen soft, no edema" />
+                        </div>
+                    </div>
+
+                    <!-- 2. Diagnosis & Complaint -->
+                    <h5 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-clipboard2-pulse me-1"></i> 2. Chief Complaint & Clinical Diagnosis
+                    </h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="ChiefComplaint" class="form-label small fw-semibold">Chief Complaint</label>
+                            <input asp-for="ChiefComplaint" class="form-control" />
+                            <span asp-validation-for="ChiefComplaint" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Diagnosis" class="form-label small fw-semibold">Clinical Diagnosis (with ICD-10 if applicable)</label>
+                            <input asp-for="Diagnosis" class="form-control" placeholder="e.g. Acute Maxillary Sinusitis (J01.00)" />
+                            <span asp-validation-for="Diagnosis" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="HistoryOfPresentIllness" class="form-label small fw-semibold">Clinical History & Doctor Observations</label>
+                            <textarea asp-for="HistoryOfPresentIllness" rows="2" class="form-control" placeholder="Detailed clinical history, onset duration, examination observations..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- 3. Dynamic Digital Prescription (Rx) -->
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h5 class="fw-bold text-primary mb-0">
+                            <span class="fs-4 fw-bold me-1">℞</span> 3. Digital Medication Regimen
+                        </h5>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="addMedicineBtn">
+                            <i class="bi bi-plus-lg me-1"></i> Add Medication
+                        </button>
+                    </div>
+                    <p class="text-muted small mb-3">Add pharmaceutical prescriptions with frequency, duration and routes.</p>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered table-sm align-middle" id="medicinesTable">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th style="width: 28%;">Medicine / Formulation</th>
+                                    <th style="width: 15%;">Dosage</th>
+                                    <th style="width: 20%;">Frequency</th>
+                                    <th style="width: 12%;">Duration</th>
+                                    <th style="width: 15%;">Instructions / Route</th>
+                                    <th style="width: 10%;" class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="medicinesBody">
+                                @for (int i = 0; i < Model.Medicines.Count; i++)
+                                {
+                                    <tr>
+                                        <td>
+                                            <input name="Medicines[@i].MedicineName" value="@Model.Medicines[i].MedicineName" class="form-control form-control-sm" placeholder="e.g. Amoxicillin 625mg" required />
+                                        </td>
+                                        <td>
+                                            <input name="Medicines[@i].Dosage" value="@Model.Medicines[i].Dosage" class="form-control form-control-sm" placeholder="e.g. 500 mg" />
+                                        </td>
+                                        <td>
+                                            <select name="Medicines[@i].Frequency" class="form-select form-select-sm">
+                                                <option value="1-0-1 (Twice Daily After Food)">1-0-1 (Twice Daily After Food)</option>
+                                                <option value="1-0-0 (Morning After Food)">1-0-0 (Morning After Food)</option>
+                                                <option value="0-0-1 (Night At Bedtime)">0-0-1 (Night At Bedtime)</option>
+                                                <option value="1-1-1 (Thrice Daily)">1-1-1 (Thrice Daily)</option>
+                                                <option value="SOS (As Needed)">SOS (As Needed)</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <input name="Medicines[@i].Duration" value="@Model.Medicines[i].Duration" class="form-control form-control-sm" placeholder="5 Days" />
+                                        </td>
+                                        <td>
+                                            <input name="Medicines[@i].SpecialInstructions" value="@Model.Medicines[i].SpecialInstructions" class="form-control form-control-sm" placeholder="Oral, with water" />
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-outline-danger btn-sm remove-row-btn" title="Remove medication">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 4. Doctor Advice & Follow-Up -->
+                    <h5 class="fw-bold text-primary mb-3">
+                        <i class="bi bi-chat-heart me-1"></i> 4. Lifestyle Advice & Follow-Up
+                    </h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-8">
+                            <label asp-for="DoctorAdvice" class="form-label small fw-semibold">Doctor Advice / Diet / Precautions</label>
+                            <textarea asp-for="DoctorAdvice" rows="2" class="form-control" placeholder="Adequate hydration, warm steam inhalation, avoid dust and cold foods..."></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="FollowUpDate" class="form-label small fw-semibold">Recommended Follow-Up Date</label>
+                            <input asp-for="FollowUpDate" class="form-control" type="date" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                        </div>
+                    </div>
+
+                    <div class="d-grid pt-3 border-top">
+                        <button type="submit" class="btn btn-success btn-lg fw-bold">
+                            <i class="bi bi-check2-circle me-1"></i> Finalize Consultation & Sign Digital Prescription
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let medicineIndex = @Model.Medicines.Count;
+
+        document.getElementById('addMedicineBtn').addEventListener('click', () => {
+            const tbody = document.getElementById('medicinesBody');
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+                <td>
+                    <input name="Medicines[${medicineIndex}].MedicineName" class="form-control form-control-sm" placeholder="e.g. Paracetamol 650mg" required />
+                </td>
+                <td>
+                    <input name="Medicines[${medicineIndex}].Dosage" class="form-control form-control-sm" value="500 mg" placeholder="500 mg" />
+                </td>
+                <td>
+                    <select name="Medicines[${medicineIndex}].Frequency" class="form-select form-select-sm">
+                        <option value="1-0-1 (Twice Daily After Food)">1-0-1 (Twice Daily After Food)</option>
+                        <option value="1-0-0 (Morning After Food)">1-0-0 (Morning After Food)</option>
+                        <option value="0-0-1 (Night At Bedtime)">0-0-1 (Night At Bedtime)</option>
+                        <option value="1-1-1 (Thrice Daily)">1-1-1 (Thrice Daily)</option>
+                        <option value="SOS (As Needed)">SOS (As Needed)</option>
+                    </select>
+                </td>
+                <td>
+                    <input name="Medicines[${medicineIndex}].Duration" class="form-control form-control-sm" value="5 Days" placeholder="5 Days" />
+                </td>
+                <td>
+                    <input name="Medicines[${medicineIndex}].SpecialInstructions" class="form-control form-control-sm" placeholder="Oral, with water" />
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-row-btn" title="Remove medication">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+            medicineIndex++;
+            attachRemoveHandlers();
+        });
+
+        function attachRemoveHandlers() {
+            document.querySelectorAll('.remove-row-btn').forEach(btn => {
+                btn.onclick = function() {
+                    const tr = this.closest('tr');
+                    const tbody = document.getElementById('medicinesBody');
+                    if (tbody.children.length > 1) {
+                        tr.remove();
+                    } else {
+                        alert('At least one medication line is recommended (or clear medicine name).');
+                    }
+                };
+            });
+        }
+
+        attachRemoveHandlers();
+    </script>
+}

@@ -1,0 +1,238 @@
+@{
+    ViewData["Title"] = "Clinical Healthcare & Smart Scheduling";
+    var departments = ViewBag.Departments as List<Department> ?? new List<Department>();
+    var featuredDoctors = ViewBag.FeaturedDoctors as List<DoctorProfile> ?? new List<DoctorProfile>();
+}
+
+<!-- Hero Section -->
+<section class="cp-hero">
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-7">
+                <span class="badge bg-white text-primary px-3 py-2 rounded-pill fw-semibold mb-3 shadow-sm">
+                    <i class="bi bi-shield-check text-success me-1"></i> HealthTech Solution 04 // CLINICAL
+                </span>
+                <h1 class="display-4 fw-bold lh-sm mb-3">
+                    CarePulse &ndash; Healthcare & Clinical Appointment System
+                </h1>
+                <p class="lead mb-4 opacity-90">
+                    Smart Doctor Scheduling, Electronic Records & Clinical Workflows. Resolved real-world clinical congestion with real-time availability calendars and conflict prevention logic.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-controller="Appointments" asp-action="Book" class="btn btn-light btn-lg px-4 fw-bold text-primary shadow-sm">
+                        <i class="bi bi-calendar-plus me-2"></i> Book Patient Appointment
+                    </a>
+                    <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-light btn-lg px-4">
+                        <i class="bi bi-search me-2"></i> Browse Specialists
+                    </a>
+                    <a href="/swagger" target="_blank" class="btn btn-dark btn-lg px-3">
+                        <i class="bi bi-terminal me-1"></i> REST API
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="card bg-white text-dark border-0 shadow-lg p-4 rounded-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+                        <h5 class="fw-bold mb-0 text-primary">
+                            <i class="bi bi-speedometer2 me-1"></i> Live Clinical Metrics
+                        </h5>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Online</span>
+                    </div>
+                    <div class="row g-3 text-center">
+                        <div class="col-4">
+                            <div class="p-2 bg-light rounded-3">
+                                <h3 class="fw-bold text-primary mb-0">@ViewBag.TotalDoctors</h3>
+                                <small class="text-muted">Specialists</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 bg-light rounded-3">
+                                <h3 class="fw-bold text-success mb-0">@ViewBag.TotalPatients</h3>
+                                <small class="text-muted">Patients</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 bg-light rounded-3">
+                                <h3 class="fw-bold text-info mb-0">@ViewBag.TotalAppointments</h3>
+                                <small class="text-muted">Visits</small>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="small">
+                        <div class="d-flex align-items-center mb-2 text-secondary">
+                            <i class="bi bi-check2-circle text-success fs-5 me-2"></i>
+                            <span>Zero double-booking via Atomic Conflict Prevention</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2 text-secondary">
+                            <i class="bi bi-check2-circle text-success fs-5 me-2"></i>
+                            <span>RBAC Secure Electronic Health Record (EHR)</span>
+                        </div>
+                        <div class="d-flex align-items-center text-secondary">
+                            <i class="bi bi-check2-circle text-success fs-5 me-2"></i>
+                            <span>Automated QuestPDF Digital Prescriptions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Demo Credentials Helper Banner for GitHub / Portfolio Reviewers -->
+<div class="container my-4">
+    <div class="card border-primary-subtle bg-primary-subtle p-3 rounded-3 shadow-sm">
+        <div class="row align-items-center gy-2">
+            <div class="col-md-3">
+                <span class="fw-bold text-primary">
+                    <i class="bi bi-key-fill me-1"></i> Quick Demo Access:
+                </span>
+            </div>
+            <div class="col-md-3">
+                <small class="d-block text-muted">Admin Account</small>
+                <code class="text-dark fw-bold">admin@carepulse.com</code> / <code>Admin@123</code>
+            </div>
+            <div class="col-md-3">
+                <small class="d-block text-muted">Attending Doctor</small>
+                <code class="text-dark fw-bold">doctor.meredith@carepulse.com</code> / <code>Doctor@123</code>
+            </div>
+            <div class="col-md-3">
+                <small class="d-block text-muted">Registered Patient</small>
+                <code class="text-dark fw-bold">patient.bruce@carepulse.com</code> / <code>Patient@123</code>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Architecture & Feature Highlights -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h6 class="text-primary text-uppercase fw-bold tracking-wider">Clinical Engineering</h6>
+            <h2 class="fw-bold">Engineered for High-Volume Clinical Environments</h2>
+            <p class="text-muted mx-auto" style="max-width: 650px;">
+                CarePulse decouples reception congestion through smart scheduling algorithms, automated prescription generation, and strict role-based data protection.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-4 cp-card cp-card-hover border-0">
+                    <div class="text-primary fs-1 mb-3">
+                        <i class="bi bi-calendar2-range"></i>
+                    </div>
+                    <h5 class="fw-bold">Smart Doctor Scheduling</h5>
+                    <p class="text-muted small">
+                        Real-time doctor availability calendars with mathematical overlap detection preventing doctor & patient double-booking.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-4 cp-card cp-card-hover border-0">
+                    <div class="text-primary fs-1 mb-3">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <h5 class="fw-bold">Secure EHR & RBAC</h5>
+                    <p class="text-muted small">
+                        Electronic Health Records with strict role-based access control protecting diagnosis history, allergies, vitals, and lab attachments.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-4 cp-card cp-card-hover border-0">
+                    <div class="text-primary fs-1 mb-3">
+                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                    </div>
+                    <h5 class="fw-bold">Digital Prescriptions</h5>
+                    <p class="text-muted small">
+                        One-click QuestPDF clinical export generating verified Rx sheets with dosage schedules, ICD diagnosis codes, and digital stamps.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 p-4 cp-card cp-card-hover border-0">
+                    <div class="text-primary fs-1 mb-3">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <h5 class="fw-bold">Background Notifications</h5>
+                    <p class="text-muted small">
+                        Integrated hosted background worker automatically dispatching appointment reminders, status updates, and cancellation alerts.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Clinical Departments -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Clinical Specialties & Departments</h3>
+                <p class="text-muted mb-0">Multi-disciplinary specialty centers available for consultation</p>
+            </div>
+            <a asp-controller="Doctors" asp-action="Index" class="btn btn-outline-primary btn-sm">View All Specialists &rarr;</a>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var dept in departments)
+            {
+                <div class="col-md-4 col-sm-6">
+                    <div class="p-3 border rounded-3 h-100 cp-card cp-card-hover d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-primary-subtle text-primary p-3 fs-3">
+                            <i class="bi @dept.IconClass"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1">@dept.Name</h6>
+                            <p class="text-muted small mb-0">@dept.Description</p>
+                            <a asp-controller="Doctors" asp-action="Index" asp-route-departmentId="@dept.Id" class="small text-primary fw-semibold text-decoration-none">
+                                Consult Specialists &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Featured Physicians -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h3 class="fw-bold">Featured Attending Physicians</h3>
+            <p class="text-muted">Consult with certified specialists with real-time calendar availability</p>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var doc in featuredDoctors)
+            {
+                <div class="col-lg-3 col-md-6">
+                    <div class="card h-100 cp-card cp-card-hover border-0 overflow-hidden">
+                        <div class="bg-primary-subtle text-primary text-center py-4">
+                            <i class="bi bi-person-badge fs-1"></i>
+                        </div>
+                        <div class="card-body">
+                            <span class="badge bg-info-subtle text-info border border-info-subtle mb-2">@doc.Department?.Name</span>
+                            <h5 class="fw-bold mb-1">Dr. @(doc.User?.FullName ?? "Physician")</h5>
+                            <p class="text-muted small mb-2">@doc.Qualification</p>
+                            <div class="small text-secondary mb-3">
+                                <div><i class="bi bi-award me-1 text-primary"></i> @doc.ExperienceYears+ Yrs Clinical Exp</div>
+                                <div><i class="bi bi-cash-stack me-1 text-success"></i> Consultation: $@doc.ConsultationFee</div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a asp-controller="Appointments" asp-action="Book" asp-route-doctorId="@doc.Id" class="btn btn-cp-primary btn-sm">
+                                    <i class="bi bi-calendar-check me-1"></i> Book Slot
+                                </a>
+                                <a asp-controller="Doctors" asp-action="Details" asp-route-id="@doc.Id" class="btn btn-outline-secondary btn-sm">
+                                    View Profile
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

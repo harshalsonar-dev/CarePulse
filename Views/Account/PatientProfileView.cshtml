@@ -1,0 +1,68 @@
+@model CarePulse.Models.Entities.PatientProfile
+@{
+    ViewData["Title"] = "Patient Profile & EHR Metadata";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card cp-card border-0 p-4">
+                <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                    <div class="bg-primary text-white rounded-circle p-3 fs-2">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">@(Model.User?.FullName ?? "Patient")</h4>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Verified Patient Profile</span>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">Email Address</label>
+                        <p class="fw-medium mb-2">@Model.User?.Email</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">Contact Phone</label>
+                        <p class="fw-medium mb-2">@(Model.User?.PhoneNumber ?? "Not provided")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small fw-semibold">Blood Group</label>
+                        <p class="fw-bold text-danger mb-2">@Model.BloodGroup</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small fw-semibold">Gender</label>
+                        <p class="fw-medium mb-2">@(Model.User?.Gender?.ToString() ?? "Not specified")</p>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-muted small fw-semibold">Date of Birth</label>
+                        <p class="fw-medium mb-2">@(Model.User?.DateOfBirth?.ToString("dd MMM yyyy") ?? "Not specified")</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small fw-semibold">Known Allergies</label>
+                        <div class="p-2 bg-danger-subtle text-danger border border-danger-subtle rounded-3 small fw-bold">
+                            @(string.IsNullOrWhiteSpace(Model.Allergies) ? "No known drug allergies reported." : Model.Allergies)
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">Emergency Contact</label>
+                        <p class="fw-medium mb-0">@Model.EmergencyContactName (@Model.EmergencyContactPhone)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">Insurance Policy</label>
+                        <p class="fw-medium mb-0">@Model.InsuranceProvider - @Model.InsurancePolicyNumber</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex gap-2">
+                    <a asp-controller="Ehr" asp-action="MyRecord" class="btn btn-cp-primary">
+                        <i class="bi bi-file-earmark-medical me-1"></i> View Full Health Record (EHR)
+                    </a>
+                    <a asp-controller="Appointments" asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-calendar2 me-1"></i> My Appointments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

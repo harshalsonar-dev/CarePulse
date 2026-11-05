@@ -1,0 +1,176 @@
+@model CarePulse.Models.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Clinical Admin Dashboard";
+}
+
+<div class="container py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-speedometer2 text-primary me-2"></i> Clinical Operations Dashboard
+            </h2>
+            <p class="text-muted small mb-0">Clinic resource analytics, appointment flows, doctor availability and RBAC oversight</p>
+        </div>
+        <div>
+            <a href="/swagger" target="_blank" class="btn btn-dark btn-sm">
+                <i class="bi bi-code-slash me-1"></i> Swagger API Explorer
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Metric Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card cp-card border-0 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <small class="text-muted text-uppercase fw-semibold">Doctors</small>
+                        <h3 class="fw-bold text-primary mb-0">@Model.TotalDoctors</h3>
+                    </div>
+                    <div class="bg-primary-subtle text-primary rounded-circle p-3 fs-3">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card cp-card border-0 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <small class="text-muted text-uppercase fw-semibold">Registered Patients</small>
+                        <h3 class="fw-bold text-success mb-0">@Model.TotalPatients</h3>
+                    </div>
+                    <div class="bg-success-subtle text-success rounded-circle p-3 fs-3">
+                        <i class="bi bi-people"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card cp-card border-0 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <small class="text-muted text-uppercase fw-semibold">Total Appointments</small>
+                        <h3 class="fw-bold text-info mb-0">@Model.TotalAppointments</h3>
+                    </div>
+                    <div class="bg-info-subtle text-info rounded-circle p-3 fs-3">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card cp-card border-0 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <small class="text-muted text-uppercase fw-semibold">Completed Visits</small>
+                        <h3 class="fw-bold text-warning mb-0">@Model.CompletedConsultationsCount</h3>
+                    </div>
+                    <div class="bg-warning-subtle text-warning rounded-circle p-3 fs-3">
+                        <i class="bi bi-check2-all"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Doctors Management -->
+    <div class="card cp-card border-0 mb-4">
+        <div class="cp-card-header d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-primary">Doctor Management & Real-Time Availability</h5>
+            <span class="badge bg-light text-secondary border">@Model.Doctors.Count Active Practitioners</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                    <tr>
+                        <th class="ps-4">Doctor</th>
+                        <th>Department</th>
+                        <th>Working Days</th>
+                        <th>Daily Hours</th>
+                        <th>Fee</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var doc in Model.Doctors)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold">
+                                Dr. @(doc.User?.FullName ?? "Physician")
+                                <small class="text-muted d-block">Lic: @doc.LicenseNumber</small>
+                            </td>
+                            <td>@doc.Department?.Name</td>
+                            <td><span class="badge bg-light text-dark border">@doc.WorkingDays</span></td>
+                            <td>@DateTime.Today.Add(doc.DailyStartTime).ToString("hh:mm tt") &ndash; @DateTime.Today.Add(doc.DailyEndTime).ToString("hh:mm tt")</td>
+                            <td>$@doc.ConsultationFee</td>
+                            <td>
+                                @if (doc.IsAvailable)
+                                {
+                                    <span class="badge bg-success-subtle text-success">Available</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-subtle text-danger">On Leave</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <form asp-action="ToggleDoctorStatus" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="doctorId" value="@doc.Id" />
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                        Toggle Status
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Appointments Stream -->
+    <div class="card cp-card border-0">
+        <div class="cp-card-header d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-primary">Recent Patient Appointment Stream</h5>
+            <a asp-controller="Appointments" asp-action="Index" class="btn btn-outline-primary btn-sm">View Full Log</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                    <tr>
+                        <th class="ps-4">Ref #</th>
+                        <th>Scheduled Date</th>
+                        <th>Doctor</th>
+                        <th>Patient</th>
+                        <th>Complaint</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var appt in Model.RecentAppointments)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold">@appt.AppointmentNumber</td>
+                            <td>@appt.AppointmentDate.ToString("dd MMM yyyy")</td>
+                            <td>Dr. @(appt.Doctor?.User?.FullName ?? "Physician")</td>
+                            <td>@(appt.Patient?.User?.FullName ?? "Patient")</td>
+                            <td class="text-truncate" style="max-width: 150px;">@appt.ChiefComplaint</td>
+                            <td>
+                                <span class="badge bg-light text-dark border">@appt.Status</span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-controller="Appointments" asp-action="Details" asp-route-id="@appt.Id" class="btn btn-outline-secondary btn-sm">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

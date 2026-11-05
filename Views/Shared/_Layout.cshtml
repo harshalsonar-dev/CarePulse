@@ -1,0 +1,203 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CarePulse HealthTech</title>
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- Custom Site CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg cp-navbar py-2 sticky-top">
+            <div class="container">
+                <a class="navbar-brand cp-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-heart-pulse-fill text-danger fs-3"></i>
+                    <span>Care<strong class="text-primary">Pulse</strong></span>
+                    <span class="badge bg-light text-primary border ms-1 fs-8 fw-semibold">Clinical EHR</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-medium" asp-controller="Doctors" asp-action="Index">
+                                <i class="bi bi-people me-1 text-primary"></i> Doctors
+                            </a>
+                        </li>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark fw-medium" asp-controller="Appointments" asp-action="Index">
+                                    <i class="bi bi-calendar2-check me-1 text-primary"></i> Appointments
+                                </a>
+                            </li>
+
+                            @if (User.IsInRole("Patient"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark fw-medium" asp-controller="Ehr" asp-action="MyRecord">
+                                        <i class="bi bi-file-earmark-medical me-1 text-primary"></i> Health Record (EHR)
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-primary fw-semibold" asp-controller="Appointments" asp-action="Book">
+                                        <i class="bi bi-plus-circle-fill me-1"></i> Book Visit
+                                    </a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Doctor") || User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark fw-medium" asp-controller="Ehr" asp-action="PatientsList">
+                                        <i class="bi bi-folder2-open me-1 text-primary"></i> Patient Records
+                                    </a>
+                                </li>
+                            }
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark fw-medium" asp-controller="Admin" asp-action="Dashboard">
+                                        <i class="bi bi-speedometer2 me-1 text-primary"></i> Admin Dashboard
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+
+                    <ul class="navbar-nav align-items-center">
+                        <li class="nav-item me-2">
+                            <a class="nav-link text-secondary" href="/swagger" target="_blank" title="RESTful API Swagger Documentation">
+                                <span class="badge bg-dark text-white"><i class="bi bi-code-slash me-1"></i> Swagger API</span>
+                            </a>
+                        </li>
+
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item me-3">
+                                <a class="nav-link position-relative text-secondary" asp-controller="Notifications" asp-action="Index" title="Notifications">
+                                    <i class="bi bi-bell fs-5"></i>
+                                    <span class="position-absolute top-1 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                                        <span class="visually-hidden">New alerts</span>
+                                    </span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle d-flex align-items-center text-dark" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-weight: 600;">
+                                        @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                    </div>
+                                    <span class="fw-medium">@User.Identity?.Name</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userDropdown">
+                                    <li><h6 class="dropdown-header">Logged in as @User.Identity?.Name</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Profile">
+                                            <i class="bi bi-person me-2"></i> My Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Notifications" asp-action="Index">
+                                            <i class="bi bi-bell me-2"></i> Notifications
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="dropdown-item text-danger">
+                                                <i class="bi bi-box-arrow-right me-2"></i> Log out
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item me-2">
+                                <a class="btn btn-outline-primary btn-sm px-3" asp-controller="Account" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-primary btn-sm px-3" asp-controller="Account" asp-action="Register">
+                                    <i class="bi bi-person-plus me-1"></i> Patient Register
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="flex-grow-1">
+        <!-- Toast / Flash alerts -->
+        <div class="container mt-3">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                    <i class="bi bi-check-circle-fill fs-5 me-2"></i>
+                    <div>@TempData["SuccessMessage"]</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 me-2"></i>
+                    <div>@TempData["ErrorMessage"]</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+        </div>
+
+        @RenderBody()
+    </main>
+
+    <footer class="py-4 mt-5 text-muted">
+        <div class="container">
+            <div class="row align-items-center gy-3">
+                <div class="col-md-6 text-center text-md-start">
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 mb-1">
+                        <i class="bi bi-heart-pulse-fill text-danger"></i>
+                        <span class="fw-bold text-dark">CarePulse Health & Clinical Systems</span>
+                    </div>
+                    <small class="text-secondary">&copy; @DateTime.UtcNow.Year CarePulse EHR. Compliant with role-based health privacy standards.</small>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <ul class="list-inline mb-0 small">
+                        <li class="list-inline-item"><a asp-controller="Home" asp-action="Index" class="text-secondary text-decoration-none">Home</a></li>
+                        <li class="list-inline-item">&bull;</li>
+                        <li class="list-inline-item"><a asp-controller="Doctors" asp-action="Index" class="text-secondary text-decoration-none">Specialists</a></li>
+                        <li class="list-inline-item">&bull;</li>
+                        <li class="list-inline-item"><a href="/swagger" target="_blank" class="text-secondary text-decoration-none">REST API</a></li>
+                        <li class="list-inline-item">&bull;</li>
+                        <li class="list-inline-item"><a asp-controller="Home" asp-action="Privacy" class="text-secondary text-decoration-none">Privacy & EHR Security</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle & jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,166 @@
+@model CarePulse.Models.ViewModels.AppointmentDetailsViewModel
+@{
+    var appt = Model.Appointment;
+    ViewData["Title"] = $"Appointment {appt.AppointmentNumber}";
+
+    var statusClass = appt.Status switch
+    {
+        AppointmentStatus.Confirmed => "badge-status-confirmed",
+        AppointmentStatus.Completed => "badge-status-completed",
+        AppointmentStatus.Cancelled => "badge-status-cancelled",
+        _ => "badge-status-pending"
+    };
+
+    var formattedTime = $"{DateTime.Today.Add(appt.StartTime):hh:mm tt} - {DateTime.Today.Add(appt.EndTime):hh:mm tt}";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Header Card -->
+            <div class="card cp-card border-0 mb-4 p-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 border-bottom pb-3 mb-3">
+                    <div>
+                        <span class="badge bg-light text-secondary border mb-1">Appointment Reference</span>
+                        <h3 class="fw-bold text-primary mb-0">@appt.AppointmentNumber</h3>
+                    </div>
+                    <div>
+                        <span class="badge @statusClass px-3 py-2 fs-6 rounded-pill">
+                            @appt.Status
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Date & Time -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <small class="text-muted text-uppercase fw-semibold d-block">Scheduled Date</small>
+                            <span class="fs-5 fw-bold text-dark">@appt.AppointmentDate.ToString("dd MMMM yyyy")</span>
+                            <div class="small text-secondary mt-1">
+                                <i class="bi bi-clock me-1 text-primary"></i> @formattedTime
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Doctor Info -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <small class="text-muted text-uppercase fw-semibold d-block">Attending Doctor</small>
+                            <span class="fs-5 fw-bold text-dark">Dr. @(appt.Doctor?.User?.FullName ?? "Physician")</span>
+                            <div class="small text-secondary mt-1">
+                                <span class="badge bg-primary-subtle text-primary">@appt.Doctor?.Department?.Name</span>
+                                <div class="mt-1">Room: @appt.Doctor?.RoomNumber</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Patient Info -->
+                    <div class="col-md-4">
+                        <div class="p-3 bg-light rounded-3">
+                            <small class="text-muted text-uppercase fw-semibold d-block">Patient Record</small>
+                            <span class="fs-5 fw-bold text-dark">@(appt.Patient?.User?.FullName ?? "Patient")</span>
+                            <div class="small text-secondary mt-1">
+                                <div>Blood Group: <strong class="text-danger">@appt.Patient?.BloodGroup</strong></div>
+                                <div>Allergies: <span class="text-danger fw-semibold">@(appt.Patient?.Allergies ?? "None")</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <!-- Complaint & Clinical Notes -->
+                <div class="mb-3">
+                    <h6 class="fw-bold text-primary">Chief Complaint & Clinical Symptoms:</h6>
+                    <div class="p-3 bg-white border rounded-3 text-dark">
+                        @appt.ChiefComplaint
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(appt.PatientNotes))
+                {
+                    <div class="mb-3">
+                        <h6 class="fw-bold text-secondary">Patient Notes:</h6>
+                        <p class="text-muted small">@appt.PatientNotes</p>
+                    </div>
+                }
+
+                @if (appt.Status == AppointmentStatus.Cancelled)
+                {
+                    <div class="alert alert-danger mb-3 p-3">
+                        <i class="bi bi-x-circle-fill me-2"></i>
+                        <strong>Cancelled on @appt.CancelledAt?.ToString("dd MMM yyyy, hh:mm tt")</strong>
+                        <div class="small mt-1">Reason: @appt.CancellationReason</div>
+                    </div>
+                }
+
+                <!-- Action Controls -->
+                <div class="d-flex flex-wrap gap-2 mt-4 pt-3 border-top">
+                    @if (Model.CanConsult && appt.Status == AppointmentStatus.Confirmed)
+                    {
+                        <a asp-controller="Consultation" asp-action="Create" asp-route-appointmentId="@appt.Id" class="btn btn-success fw-bold px-3">
+                            <i class="bi bi-stethoscope me-1"></i> Start Consultation & Write Rx
+                        </a>
+                    }
+
+                    @if (appt.Status == AppointmentStatus.Completed && appt.Consultation != null)
+                    {
+                        <a asp-controller="Consultation" asp-action="Details" asp-route-id="@appt.Consultation.Id" class="btn btn-primary fw-bold">
+                            <i class="bi bi-file-earmark-medical me-1"></i> View Clinical Consultation
+                        </a>
+
+                        <a asp-controller="Consultation" asp-action="DownloadPrescriptionPdf" asp-route-id="@appt.Consultation.Id" target="_blank" class="btn btn-outline-primary">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Download Digital Rx (PDF)
+                        </a>
+                    }
+
+                    @if (User.IsInRole("Doctor") || User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Ehr" asp-action="Patient" asp-route-id="@appt.PatientId" class="btn btn-outline-info">
+                            <i class="bi bi-folder2 me-1"></i> Patient EHR
+                        </a>
+                    }
+
+                    @if (Model.CanCancel)
+                    {
+                        <button type="button" class="btn btn-outline-danger ms-auto" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                            <i class="bi bi-x-circle me-1"></i> Cancel Appointment
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancellation Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Cancel" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@appt.Id" />
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="cancelModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Cancel Appointment
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="small text-muted">
+                        Are you sure you want to cancel appointment <strong>@appt.AppointmentNumber</strong>? The consultation slot will be immediately made available to other patients.
+                    </p>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Cancellation Reason</label>
+                        <textarea name="reason" rows="3" class="form-control" placeholder="Provide cancellation reason (e.g. Schedule conflict, symptom resolved, emergency)..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Keep Appointment</button>
+                    <button type="submit" class="btn btn-danger btn-sm">Confirm Cancellation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,69 @@
+@model CarePulse.Models.Entities.DoctorProfile
+@{
+    ViewData["Title"] = "Physician Profile";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card cp-card border-0 p-4">
+                <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                    <div class="bg-primary text-white rounded-circle p-3 fs-2">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0">Dr. @(Model.User?.FullName ?? "Physician")</h4>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                            @Model.Department?.Name | Attending Specialist
+                        </span>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">Specialization</label>
+                        <p class="fw-bold text-primary mb-2">@Model.Specialization</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">License Number</label>
+                        <p class="fw-medium mb-2"><code>@Model.LicenseNumber</code></p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">Qualifications</label>
+                        <p class="fw-medium mb-2">@Model.Qualification</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">Clinical Experience</label>
+                        <p class="fw-medium mb-2">@Model.ExperienceYears Years</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">Consultation Room</label>
+                        <p class="fw-medium mb-2">@Model.RoomNumber</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small fw-semibold">Consultation Fee</label>
+                        <p class="fw-bold text-success mb-2">$@Model.ConsultationFee</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small fw-semibold">Weekly Consultation Schedule</label>
+                        <div class="p-3 bg-light rounded-3 border">
+                            <div><strong>Active Working Days:</strong> @Model.WorkingDays</div>
+                            <div><strong>Daily Hours:</strong> @DateTime.Today.Add(Model.DailyStartTime).ToString("hh:mm tt") &ndash; @DateTime.Today.Add(Model.DailyEndTime).ToString("hh:mm tt")</div>
+                            <div><strong>Slot Duration:</strong> @Model.SlotDurationMinutes Minutes per Patient</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small fw-semibold">Clinical Biography</label>
+                        <p class="text-secondary small mb-0">@Model.Bio</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top d-flex gap-2">
+                    <a asp-controller="Appointments" asp-action="Index" class="btn btn-cp-primary">
+                        <i class="bi bi-calendar2-week me-1"></i> View Clinical Schedule
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

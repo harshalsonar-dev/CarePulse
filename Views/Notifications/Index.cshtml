@@ -1,0 +1,87 @@
+@model List<CarePulse.Models.Entities.Notification>
+@{
+    ViewData["Title"] = "Notification Alerts";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <div>
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-bell-fill text-primary me-2"></i> Notifications & Alerts
+                    </h3>
+                    <p class="text-muted small mb-0">Automated scheduling alerts, status updates & prescription dispatches</p>
+                </div>
+                @if (Model.Any(n => !n.IsRead))
+                {
+                    <form asp-action="MarkAllAsRead" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-check2-all me-1"></i> Mark All as Read
+                        </button>
+                    </form>
+                }
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="card cp-card border-0 p-5 text-center text-muted">
+                    <i class="bi bi-bell-slash fs-1 mb-2"></i>
+                    <h6>No notifications at this time.</h6>
+                </div>
+            }
+            else
+            {
+                <div class="list-group shadow-sm border-0 rounded-3">
+                    @foreach (var n in Model)
+                    {
+                        var iconClass = n.Type switch
+                        {
+                            NotificationType.AppointmentBooked => "bi-calendar-plus text-primary",
+                            NotificationType.AppointmentConfirmed => "bi-check-circle text-success",
+                            NotificationType.AppointmentCancelled => "bi-x-circle text-danger",
+                            NotificationType.PrescriptionReady => "bi-file-earmark-medical text-info",
+                            _ => "bi-bell text-secondary"
+                        };
+
+                        <div class="list-group-item list-group-item-action p-3 @(!n.IsRead ? "bg-primary-subtle bg-opacity-25 border-start border-4 border-primary" : "")">
+                            <div class="d-flex align-items-start justify-content-between gap-3">
+                                <div class="d-flex align-items-start gap-3">
+                                    <div class="fs-4 mt-1">
+                                        <i class="bi @iconClass"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1 text-dark">
+                                            @n.Title
+                                            @if (!n.IsRead)
+                                            {
+                                                <span class="badge bg-primary ms-1 small">New</span>
+                                            }
+                                        </h6>
+                                        <p class="text-secondary small mb-1">@n.Message</p>
+                                        <small class="text-muted">@n.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column align-items-end gap-1">
+                                    @if (!string.IsNullOrEmpty(n.LinkUrl))
+                                    {
+                                        <a href="@n.LinkUrl" class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size: 0.75rem;">View</a>
+                                    }
+                                    @if (!n.IsRead)
+                                    {
+                                        <form asp-action="MarkAsRead" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@n.Id" />
+                                            <button type="submit" class="btn btn-link text-muted p-0" style="font-size: 0.75rem;" title="Mark as Read">Dismiss</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

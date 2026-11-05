@@ -1,0 +1,294 @@
+@model CarePulse.Models.ViewModels.PatientEhrViewModel
+@{
+    var patient = Model.Patient;
+    ViewData["Title"] = $"EHR - {patient.User?.FullName}";
+}
+
+<div class="container py-4">
+    <!-- Header Patient Banner -->
+    <div class="card cp-card border-0 mb-4 p-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 border-bottom pb-3 mb-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="bg-primary text-white rounded-circle p-3 fs-2">
+                    <i class="bi bi-person-heart"></i>
+                </div>
+                <div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle mb-1">Electronic Health Record (EHR)</span>
+                    <h3 class="fw-bold text-dark mb-0">@(patient.User?.FullName ?? "Patient")</h3>
+                    <small class="text-muted">ID: @patient.Id &bull; Insurance: @patient.InsurancePolicyNumber</small>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadAttachmentModal">
+                    <i class="bi bi-cloud-arrow-up me-1"></i> Upload Lab Report / Scan
+                </button>
+                @if (Model.IsDoctorOrAdmin)
+                {
+                    <a asp-action="PatientsList" class="btn btn-outline-secondary btn-sm">&larr; Patient Registry</a>
+                }
+            </div>
+        </div>
+
+        <!-- Vital Demographics -->
+        <div class="row g-3">
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-light rounded-3 text-center">
+                    <small class="text-muted text-uppercase fw-semibold d-block">Blood Group</small>
+                    <span class="fs-4 fw-bold text-danger">@patient.BloodGroup</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-light rounded-3 text-center">
+                    <small class="text-muted text-uppercase fw-semibold d-block">Gender</small>
+                    <span class="fs-4 fw-bold text-dark">@(patient.User?.Gender?.ToString() ?? "N/A")</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-light rounded-3 text-center">
+                    <small class="text-muted text-uppercase fw-semibold d-block">Date of Birth</small>
+                    <span class="fs-5 fw-bold text-dark">@(patient.User?.DateOfBirth?.ToString("dd MMM yyyy") ?? "N/A")</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-light rounded-3 text-center">
+                    <small class="text-muted text-uppercase fw-semibold d-block">Consultations</small>
+                    <span class="fs-4 fw-bold text-primary">@Model.Consultations.Count</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Allergy Alert Banner -->
+        <div class="mt-3 p-3 bg-danger-subtle text-danger border border-danger-subtle rounded-3 d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-octagon-fill fs-4"></i>
+            <div>
+                <strong>Known Clinical Allergies & Precautions:</strong>
+                <span class="ms-1">@(string.IsNullOrWhiteSpace(patient.Allergies) ? "No adverse drug allergies reported." : patient.Allergies)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main EHR Nav Tabs -->
+    <ul class="nav nav-tabs mb-4" id="ehrTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="consultations-tab" data-bs-toggle="tab" data-bs-target="#consultations" type="button" role="tab">
+                <i class="bi bi-clipboard2-pulse me-1 text-primary"></i> Consultations & Prescriptions (@Model.Consultations.Count)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="attachments-tab" data-bs-toggle="tab" data-bs-target="#attachments" type="button" role="tab">
+                <i class="bi bi-file-earmark-medical me-1 text-primary"></i> Lab Reports & Cloud Attachments (@Model.Attachments.Count)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab">
+                <i class="bi bi-calendar2 me-1 text-primary"></i> Appointment History (@Model.Appointments.Count)
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="ehrTabContent">
+        <!-- Tab 1: Consultations & Digital Prescriptions -->
+        <div class="tab-pane fade show active" id="consultations" role="tabpanel">
+            @if (!Model.Consultations.Any())
+            {
+                <div class="card cp-card border-0 p-5 text-center text-muted">
+                    <i class="bi bi-folder-x fs-1 mb-2"></i>
+                    <h6>No past consultation history recorded for this patient.</h6>
+                </div>
+            }
+            else
+            {
+                <div class="row g-4">
+                    @foreach (var c in Model.Consultations)
+                    {
+                        <div class="col-12">
+                            <div class="card cp-card border-0 p-4">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 mb-3">
+                                    <div>
+                                        <div class="fw-bold fs-5 text-primary">@c.Diagnosis</div>
+                                        <div class="text-muted small">
+                                            Consulted by <strong>Dr. @(c.Doctor?.User?.FullName ?? "Physician")</strong> on @c.ConsultationDate.ToString("dd MMMM yyyy, hh:mm tt")
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a asp-controller="Consultation" asp-action="Details" asp-route-id="@c.Id" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye me-1"></i> View Consultation
+                                        </a>
+                                        @if (c.Prescription != null)
+                                        {
+                                            <a asp-controller="Consultation" asp-action="DownloadPrescriptionPdf" asp-route-id="@c.Id" target="_blank" class="btn btn-primary btn-sm">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i> Download Rx PDF
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <small class="text-muted fw-bold d-block">Chief Complaint:</small>
+                                        <div class="small text-dark">@c.ChiefComplaint</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small class="text-muted fw-bold d-block">Recorded Vitals:</small>
+                                        <div class="small text-secondary">
+                                            BP: <strong>@(c.BloodPressure ?? "--")</strong> | 
+                                            Pulse: <strong>@(c.HeartRateBpm?.ToString() ?? "--")</strong> bpm | 
+                                            Temp: <strong>@(c.TemperatureF?.ToString() ?? "--")</strong> °F | 
+                                            SpO2: <strong>@(c.SpO2Percentage?.ToString() ?? "--")</strong>%
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (c.Prescription?.Items != null && c.Prescription.Items.Any())
+                                {
+                                    <div class="p-2 bg-light rounded-3 border">
+                                        <small class="fw-bold text-secondary d-block mb-1">Prescribed Medications:</small>
+                                        <ul class="mb-0 small ps-3">
+                                            @foreach (var med in c.Prescription.Items)
+                                            {
+                                                <li>
+                                                    <strong>@med.MedicineName</strong> (@med.Dosage) &ndash; @med.Frequency for @med.Duration (@med.Route)
+                                                </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Tab 2: Lab Reports & Cloud Attachments -->
+        <div class="tab-pane fade" id="attachments" role="tabpanel">
+            @if (!Model.Attachments.Any())
+            {
+                <div class="card cp-card border-0 p-5 text-center text-muted">
+                    <i class="bi bi-cloud-slash fs-1 mb-2"></i>
+                    <h6>No medical lab reports or diagnostic imaging scans uploaded.</h6>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-cp-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadAttachmentModal">
+                            Upload Diagnostic File
+                        </button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var att in Model.Attachments)
+                    {
+                        <div class="col-md-6">
+                            <div class="card cp-card border-0 p-3 h-100 d-flex justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle">@att.RecordType</span>
+                                        <small class="text-muted">@att.UploadedAt.ToString("dd MMM yyyy")</small>
+                                    </div>
+                                    <h6 class="fw-bold mb-1">@att.Title</h6>
+                                    @if (!string.IsNullOrEmpty(att.DoctorNotes))
+                                    {
+                                        <p class="text-muted small mb-2">@att.DoctorNotes</p>
+                                    }
+                                </div>
+                                <div class="pt-2 border-top mt-2 d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">@(att.FileSizeBytes > 0 ? $"{(att.FileSizeBytes / 1024.0):F1} KB" : "Verified Record")</small>
+                                    <a href="@att.FileUrl" target="_blank" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-box-arrow-up-right me-1"></i> View Record
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Tab 3: Appointments -->
+        <div class="tab-pane fade" id="appointments" role="tabpanel">
+            <div class="card cp-card border-0 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light small">
+                            <tr>
+                                <th class="ps-3">Appointment #</th>
+                                <th>Date</th>
+                                <th>Doctor</th>
+                                <th>Complaint</th>
+                                <th>Status</th>
+                                <th class="text-end pe-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var a in Model.Appointments)
+                            {
+                                <tr>
+                                    <td class="ps-3 fw-bold">@a.AppointmentNumber</td>
+                                    <td>@a.AppointmentDate.ToString("dd MMM yyyy")</td>
+                                    <td>Dr. @(a.Doctor?.User?.FullName ?? "Physician")</td>
+                                    <td>@a.ChiefComplaint</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">@a.Status</span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <a asp-controller="Appointments" asp-action="Details" asp-route-id="@a.Id" class="btn btn-outline-secondary btn-sm">
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Lab Report Modal (Azure Blob Storage) -->
+<div class="modal fade" id="uploadAttachmentModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="UploadAttachment" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="PatientId" value="@patient.Id" />
+                <div class="modal-header">
+                    <h5 class="modal-title text-primary" id="uploadModalLabel">
+                        <i class="bi bi-cloud-arrow-up me-1"></i> Upload Medical Document / Scan
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Document Title</label>
+                        <input name="Title" class="form-control" placeholder="e.g. Chest X-Ray / Complete Blood Count (CBC)" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Record Type</label>
+                        <select name="RecordType" class="form-select">
+                            <option value="Lab Report">Lab Report</option>
+                            <option value="Radiology Scan">Radiology Scan (X-Ray, CT, MRI)</option>
+                            <option value="Discharge Summary">Discharge Summary</option>
+                            <option value="ECG / Echo Report">ECG / Echo Report</option>
+                            <option value="Other">Other Clinical Document</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Clinical Findings / Notes</label>
+                        <textarea name="DoctorNotes" rows="2" class="form-control" placeholder="Optional notes regarding the test results..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Select File (PDF, Images, Scans)</label>
+                        <input name="File" type="file" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-cp-primary btn-sm">Upload to Medical Cloud</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

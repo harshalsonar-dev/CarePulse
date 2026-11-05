@@ -1,0 +1,37 @@
+## Visual Studio & .NET GitIgnore
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+*.db
+*.db-shm
+*.db-wal
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rms/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# Uploads directory contents (preserve folder)
+wwwroot/uploads/records/*
+!wwwroot/uploads/records/.gitkeep
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini

@@ -1,0 +1,242 @@
+@model CarePulse.Models.ViewModels.BookAppointmentViewModel
+@{
+    ViewData["Title"] = "Smart Clinical Scheduling";
+    var doctors = Model.Doctors ?? new List<DoctorProfile>();
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card cp-card border-0 p-4">
+                <div class="d-flex align-items-center gap-3 mb-4 border-bottom pb-3">
+                    <div class="bg-primary-subtle text-primary rounded-circle p-3 fs-2">
+                        <i class="bi bi-calendar2-range-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">Smart Patient Appointment Scheduling</h3>
+                        <p class="text-muted small mb-0">Real-time doctor calendar availability & zero-congestion conflict prevention</p>
+                    </div>
+                </div>
+
+                <form asp-action="Book" method="post" id="bookingForm">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger shadow-sm small mb-4" role="alert"></div>
+
+                    <!-- Step 1: Select Attending Physician -->
+                    <div class="mb-4">
+                        <label asp-for="DoctorId" class="form-label fw-bold">
+                            <span class="badge bg-primary rounded-circle me-1">1</span> Select Attending Physician
+                        </label>
+                        <select asp-for="DoctorId" id="doctorSelect" class="form-select form-select-lg">
+                            <option value="">-- Choose Specialist / Department --</option>
+                            @foreach (var doc in doctors)
+                            {
+                                <option value="@doc.Id" 
+                                        data-workingdays="@doc.WorkingDays" 
+                                        data-fee="@doc.ConsultationFee"
+                                        data-room="@doc.RoomNumber"
+                                        selected="@(Model.DoctorId == doc.Id ? "selected" : null)">
+                                    Dr. @(doc.User?.FullName) &ndash; @doc.Department?.Name (@doc.Specialization) &ndash; $@doc.ConsultationFee
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="DoctorId" class="text-danger small"></span>
+
+                        <!-- Doctor info helper box -->
+                        <div id="doctorInfoCard" class="mt-2 p-3 bg-light rounded-3 border d-none small">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <span class="text-muted">Working Days:</span> <strong id="docWorkingDays">--</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="text-muted">Location:</span> <strong id="docRoom">--</strong>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="text-muted">Consultation Fee:</span> <strong class="text-success" id="docFee">--</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Select Date & Real-time Available Time Slots -->
+                    <div class="mb-4">
+                        <label asp-for="AppointmentDate" class="form-label fw-bold">
+                            <span class="badge bg-primary rounded-circle me-1">2</span> Select Appointment Date
+                        </label>
+                        <input asp-for="AppointmentDate" id="datePicker" type="date" 
+                               min="@DateTime.Today.ToString("yyyy-MM-dd")" 
+                               max="@DateTime.Today.AddDays(30).ToString("yyyy-MM-dd")"
+                               class="form-control form-control-lg" />
+                        <span asp-validation-for="AppointmentDate" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Real-Time Slot Picker -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold d-flex justify-content-between align-items-center">
+                            <span><span class="badge bg-primary rounded-circle me-1">3</span> Select Real-Time Available Time Slot</span>
+                            <span id="slotStatusBadge" class="badge bg-secondary-subtle text-secondary small">Select doctor & date</span>
+                        </label>
+
+                        <input type="hidden" asp-for="SelectedTimeSlot" id="selectedTimeSlotInput" />
+                        <span asp-validation-for="SelectedTimeSlot" class="text-danger small d-block mb-2"></span>
+
+                        <div id="slotLoadingIndicator" class="text-center py-4 d-none">
+                            <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                            <span class="text-muted small">Checking real-time calendar availability & conflict prevention logic...</span>
+                        </div>
+
+                        <div id="slotsContainer" class="slot-grid mt-2">
+                            <!-- Populated dynamically via JavaScript fetch -->
+                            <div class="col-12 text-muted small p-3 bg-light rounded-3 text-center">
+                                Please select a doctor and consultation date above to display live availability slots.
+                            </div>
+                        </div>
+
+                        <div id="selectedSlotAlert" class="mt-2 p-2 bg-success-subtle text-success border border-success-subtle rounded-3 small fw-bold d-none">
+                            <i class="bi bi-check-circle-fill me-1"></i> Selected Time Slot: <span id="selectedSlotText"></span>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Clinical Complaint -->
+                    <div class="mb-4">
+                        <label asp-for="ChiefComplaint" class="form-label fw-bold">
+                            <span class="badge bg-primary rounded-circle me-1">4</span> Chief Complaint / Reason for Visit
+                        </label>
+                        <textarea asp-for="ChiefComplaint" rows="3" class="form-control" 
+                                  placeholder="Describe the primary symptoms, onset duration, and clinical purpose of your consultation..."></textarea>
+                        <span asp-validation-for="ChiefComplaint" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="PatientNotes" class="form-label fw-semibold small text-muted">Additional Information / Patient Notes (Optional)</label>
+                        <input asp-for="PatientNotes" class="form-control" placeholder="e.g. Existing medication reports or referring physician notes" />
+                    </div>
+
+                    <div class="d-grid pt-2">
+                        <button type="submit" id="submitBtn" class="btn btn-cp-primary btn-lg fw-bold">
+                            <i class="bi bi-check2-circle me-1"></i> Confirm & Schedule Appointment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const doctorSelect = document.getElementById('doctorSelect');
+        const datePicker = document.getElementById('datePicker');
+        const slotsContainer = document.getElementById('slotsContainer');
+        const slotLoadingIndicator = document.getElementById('slotLoadingIndicator');
+        const slotStatusBadge = document.getElementById('slotStatusBadge');
+        const selectedTimeSlotInput = document.getElementById('selectedTimeSlotInput');
+        const selectedSlotAlert = document.getElementById('selectedSlotAlert');
+        const selectedSlotText = document.getElementById('selectedSlotText');
+        const doctorInfoCard = document.getElementById('doctorInfoCard');
+        const docWorkingDays = document.getElementById('docWorkingDays');
+        const docRoom = document.getElementById('docRoom');
+        const docFee = document.getElementById('docFee');
+
+        function updateDoctorInfo() {
+            const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
+            if (selectedOption && selectedOption.value) {
+                docWorkingDays.textContent = selectedOption.dataset.workingdays || 'Monday-Friday';
+                docRoom.textContent = selectedOption.dataset.room || 'General';
+                docFee.textContent = '$' + (selectedOption.dataset.fee || '0');
+                doctorInfoCard.classList.remove('d-none');
+            } else {
+                doctorInfoCard.classList.add('d-none');
+            }
+        }
+
+        async function fetchAvailableSlots() {
+            const doctorId = doctorSelect.value;
+            const date = datePicker.value;
+
+            if (!doctorId || !date) {
+                slotsContainer.innerHTML = '<div class="text-muted small p-3 bg-light rounded-3 text-center">Please select a doctor and date to check slot availability.</div>';
+                slotStatusBadge.textContent = 'Select doctor & date';
+                slotStatusBadge.className = 'badge bg-secondary-subtle text-secondary small';
+                return;
+            }
+
+            slotLoadingIndicator.classList.remove('d-none');
+            slotsContainer.innerHTML = '';
+            selectedTimeSlotInput.value = '';
+            selectedSlotAlert.classList.add('d-none');
+
+            try {
+                const response = await fetch(`/api/v1/doctors/${doctorId}/availability?date=${date}`);
+                if (!response.ok) {
+                    throw new Error('Failed to retrieve slot availability');
+                }
+
+                const data = await response.json();
+                slotLoadingIndicator.classList.add('d-none');
+
+                if (!data.slots || data.slots.length === 0) {
+                    slotsContainer.innerHTML = `
+                        <div class="alert alert-warning small p-3 mb-0 w-100 text-center">
+                            <i class="bi bi-calendar-x me-1"></i> Doctor has no scheduled consultation hours on this date. Please pick another working day.
+                        </div>`;
+                    slotStatusBadge.textContent = 'No Schedule Today';
+                    slotStatusBadge.className = 'badge bg-warning-subtle text-warning small';
+                    return;
+                }
+
+                slotStatusBadge.textContent = `${data.availableSlots} of ${data.totalSlots} Slots Available`;
+                slotStatusBadge.className = data.availableSlots > 0 
+                    ? 'badge bg-success-subtle text-success small' 
+                    : 'badge bg-danger-subtle text-danger small';
+
+                data.slots.forEach(slot => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `slot-btn ${slot.isAvailable ? '' : 'disabled'}`;
+                    btn.title = slot.isAvailable ? 'Click to select slot' : (slot.reason || 'Unavailable');
+                    btn.innerHTML = `
+                        <div class="fw-semibold">${slot.formatted}</div>
+                        <div class="small ${slot.isAvailable ? 'text-success' : 'text-danger'}">${slot.isAvailable ? 'Available' : (slot.reason || 'Booked')}</div>
+                    `;
+
+                    if (slot.isAvailable) {
+                        btn.addEventListener('click', () => {
+                            // Deselect previous
+                            document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+                            btn.classList.add('selected');
+
+                            const slotValue = `${slot.startTime}-${slot.endTime}`;
+                            selectedTimeSlotInput.value = slotValue;
+                            selectedSlotText.textContent = `${slot.formatted} (${slotValue})`;
+                            selectedSlotAlert.classList.remove('d-none');
+                        });
+                    } else {
+                        btn.disabled = true;
+                    }
+
+                    slotsContainer.appendChild(btn);
+                });
+
+            } catch (err) {
+                slotLoadingIndicator.classList.add('d-none');
+                slotsContainer.innerHTML = '<div class="alert alert-danger small p-3 w-100">Unable to query doctor schedule availability. Please try again.</div>';
+                slotStatusBadge.textContent = 'Error checking slots';
+                slotStatusBadge.className = 'badge bg-danger-subtle text-danger small';
+            }
+        }
+
+        doctorSelect.addEventListener('change', () => {
+            updateDoctorInfo();
+            fetchAvailableSlots();
+        });
+
+        datePicker.addEventListener('change', fetchAvailableSlots);
+
+        // Initial trigger
+        updateDoctorInfo();
+        if (doctorSelect.value && datePicker.value) {
+            fetchAvailableSlots();
+        }
+    </script>
+}
